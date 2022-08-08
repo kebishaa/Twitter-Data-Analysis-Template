@@ -123,4 +123,17 @@ class TweetDfExtractor:
             else:
                 retweet_count.append(0)
         return retweet_count
+      # Improved the functionality of hashtags
+    def find_hashtags(self) -> list:
+        hashtags = []
+        for tweet in self.tweets_list:
+            try:
+                hashtags.append(tweet['entities']['hashtags'][0]['text'])
+            except KeyError:
+                hashtags.append(None)
+            except IndexError:
+                hashtags.append(None)
+
+        return hashtags
+
          
