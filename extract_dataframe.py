@@ -60,4 +60,10 @@ class TweetDfExtractor:
                 sentiment.append(0)
             else:
                 sentiment.append(-1)
-        return sentiment            
+        return sentiment  
+    def find_created_time(self) -> list:
+        created_at = []
+        for time in self.tweets_list:
+            created_at.append(time['created_at'])
+        return created_at
+         
