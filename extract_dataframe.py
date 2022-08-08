@@ -25,3 +25,8 @@ class TweetDfExtractor:
 
     def __init__(self, tweets_list):
         self.tweets_list = tweets_list
+    def find_statuses_count(self) -> list:
+        statuses_count = []
+        for tweet in self.tweets_list:
+            statuses_count.append(tweet['user']['statuses_count'])
+        return statuses_count       
