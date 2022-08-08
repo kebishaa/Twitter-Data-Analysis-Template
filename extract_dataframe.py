@@ -143,4 +143,15 @@ class TweetDfExtractor:
                 [mention['screen_name'] for mention in hs['entities']['user_mentions']]))
         return mentions
 
+    def find_lang(self) -> list:
+        lang = []
+        for x in self.tweets_list:
+            lang.append(x['lang'])
+        return lang
+    
+    def find_location(self) -> list:
+        location = []
+        for tweet in self.tweets_list:
+            location.append(tweet['user']['location'])
+        return location
          
