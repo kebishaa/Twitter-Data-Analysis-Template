@@ -29,4 +29,13 @@ class TweetDfExtractor:
         statuses_count = []
         for tweet in self.tweets_list:
             statuses_count.append(tweet['user']['statuses_count'])
-        return statuses_count       
+        return statuses_count
+    def find_full_text(self) -> list:
+        full_text = []
+        for tweet in self.tweets_list:
+            try:
+                full_text.append(
+                    tweet['retweeted_status']['text'])
+            except KeyError:
+                full_text.append("")
+        return full_text        
