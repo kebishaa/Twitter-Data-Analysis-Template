@@ -21,3 +21,7 @@ def read_json(json_file: str)->list:
     for tweets in open("data/Economic_Twitter_Data.json", 'r'):
         tweets_data.append(json.loads(tweets))
     return len(tweets_data), tweets_data
+class TweetDfExtractor:
+
+    def __init__(self, tweets_list):
+        self.tweets_list = tweets_list
