@@ -60,4 +60,11 @@ class Clean_Tweets:
         df['retweet_count'] = df['retweet_count'].fillna(0)
 
         return 
-        
+    def remove_non_english_tweets(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        remove non english tweets from lang
+        """
+
+        df = df.drop(df[df['lang'] != 'en'].index)
+
+        return df
