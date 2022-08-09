@@ -27,3 +27,12 @@ class Clean_Tweets:
         df.drop_duplicates(inplace=True)
 
         return df
+    def convert_to_datetime(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        convert column to datetime
+        """
+
+        df['created_at'] = pd.to_datetime(
+            df['created_at'])
+
+        return df
