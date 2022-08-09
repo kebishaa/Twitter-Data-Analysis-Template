@@ -10,6 +10,7 @@ class Clean_Tweets:
     def __init__(self, df: pd.DataFrame):
         self.df = df
         print('Automation in Action...!!!')
+
     def drop_unwanted_column(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         remove rows that has column names. This error originated from
@@ -20,6 +21,7 @@ class Clean_Tweets:
         df = df[df['polarity'] != 'polarity']
 
         return df
+
     def drop_duplicate(self, df: pd.DataFrame) -> pd.DataFrame:
         """
         drop duplicate rows
@@ -68,3 +70,6 @@ class Clean_Tweets:
         df = df.drop(df[df['lang'] != 'en'].index)
 
         return df
+if __name__ == "__main__":
+    tweet_df = pd.read_csv("data\africa_twitter_data.csv")
+    cleaner = Clean_Tweets(tweet_df)
