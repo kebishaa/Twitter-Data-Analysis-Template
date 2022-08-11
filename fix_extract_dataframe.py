@@ -4,16 +4,7 @@ from textblob import TextBlob
 
 
 def read_json(json_file: str)->list:
-    """
-    json file reader to open and read json files into a list
-    Args:
-    -----
-    json_file: str - path of a json file
     
-    Returns
-    -------
-    length of the json file and a list of json
-    """
     
     tweets_data = []
     for tweets in open(json_file,'r'):
