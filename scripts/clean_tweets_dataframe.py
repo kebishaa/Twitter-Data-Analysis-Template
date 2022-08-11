@@ -1,75 +1,131 @@
 import pandas as pd
-import scripts.extract_dataframe as ed
+from bs4 import BeautifulSoup
+import re
+import sys
+import os
+from nltk.corpus import stopwords
+
+sys.path.append(os.path.abspath(os.path.join('data')))
 
 
-class Clean_Tweets:
-    """
-    The PEP8 Standard AMAZING!!!
-    """
+class CleanTweets:
 
     def __init__(self, df: pd.DataFrame):
         self.df = df
-        print('Automation in Action...!!!')
+        print('Cleaning in progress...')
 
-    def drop_unwanted_column(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        remove rows that has column names. This error originated from
-        the data collection stage.  
-        """
-        unwanted_rows = df[df['retweet_count'] == 'retweet_count'].index
-        df.drop(unwanted_rows, inplace=True)
-        df = df[df['polarity'] != 'polarity']
+    def drop_unwanted_column(self) -> pd.DataFrame:
+        columns = ['created_at', 'source', 'full_text', 'sentiment', 'polarity',
+                   'subjectivity', 'lang', 'statuses_count', 'favorite_count', 'retweet_count',
+                   'screen_name', 'followers_count', 'friends_count', 'possibly_sensitive',
+                   'hashtags', 'user_mentions', 'location']
+        unwanted_rows = []
+        for columnName in columns:
+            unwanted_rows = self.df[self.df[columnName] == columnName].index
+            self.df.drop(unwanted_rows, inplace=True)
+            self.df.reset_index(drop=True, inplace=True)
+        return self.df
 
-        return df
+    def drop_nullValue(self) -> pd.DataFrame:
+        self.df.dropna(subset=['full_text'], inplace=True)
+        self.df.reset_index(drop=True, inplace=True)
+        return self.df
 
-    def drop_duplicate(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        drop duplicate rows
-        """
-        df.drop_duplicates(inplace=True)
+    def drop_duplicate(self) -> pd.DataFrame:
+        self.df.drop_duplicates(inplace=True)
+        self.df.reset_index(drop=True, inplace=True)
+        return self.df
 
-        return df
-    def convert_to_datetime(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        convert column to datetime
-        """
+    def convert_to_datetime(self) -> pd.DataFrame:
+        self.df['created_at'] = pd.to_datetime(
+            self.df['created_at'], errors='coerce')
+        return self.df
 
-        df['created_at'] = pd.to_datetime(
-            df['created_at'])
+    def convert_to_numbers(self) -> pd.DataFrame:
+        self.df[['sentiment', 'polarity', 'subjectivity', 'statuses_count', 'favorite_count', 'retweet_count',
+                 'followers_count', 'friends_count']] = self.df[['sentiment', 'polarity', 'subjectivity', 'statuses_count', 'favorite_count', 'retweet_count',
+                                                                 'followers_count', 'friends_count']].apply(pd.to_numeric, errors='coerce')
+        return self.df
 
-        return df
-    def convert_to_numbers(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        convert columns like polarity, subjectivity, retweet_count
-        favorite_count etc to numbers
-        """
-        df['polarity'] = pd.to_numeric(df["polarity"])
-        df["subjectivity"] = pd.to_numeric(df["subjectivity"])
-        df["retweet_count"] = pd.to_numeric(df["retweet_count"])
-        df["favorite_count"] = pd.to_numeric(df["favorite_count"])
-    #     df["friends_count "] = pd.to_numeric(df["friends_count"])
+    def remove_non_english_tweets(self) -> pd.DataFrame:
+        index_names = self.df[self.df['lang'] != 'en'].index
+        self.df.drop(index_names, inplace=True)
+        self.df.reset_index(drop=True, inplace=True)
+        return self.df
 
-        return df
-    def handle_missing_values(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-            handle missing values
-        """
+    def remove_emoji(self, text):
+        emoji_pattern = re.compile("["
+                                   u"\U0001F600-\U0001F64F"  # emoticons
+                                   u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                                   u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                                   u"\U0001F1E0-\U0001F1FF"  # flags
+                                   u"\U00002702-\U000027B0"
+                                   u"\U000024C2-\U0001F251"
+                                   "]+", flags=re.UNICODE)
+        return emoji_pattern.sub(r'', text)
 
-        df['possibly_sensitive'] = df['possibly_sensitive'].fillna(0)
-        df['place'] = df['place'].fillna(" ")
-        df['hashtags'] = df['hashtags'].fillna(" ")
-        df['user_mentions'] = df['user_mentions'].fillna(" ")
-        df['retweet_count'] = df['retweet_count'].fillna(0)
+    def clean_full_text(self) -> pd.DataFrame:
+        self.df['full_text'] = self.df['full_text'].apply(
+            lambda x: " ".join(x.lower() for x in x.split()))  # lowercase
+        self.df['full_text'] = self.df['full_text'].str.replace(
+            '[^\w\s]', '')  # remove punctuation
+        self.df['full_text'] = self.df['full_text'].apply(
+            lambda x: self.remove_emoji(x))  # remove emoji
+        stop = stopwords.words('english')  # remove stopwords
+        self.df['full_text'] = self.df['full_text'].apply(
+            lambda x: " ".join(x for x in x.split() if x not in stop))
+        self.df['full_text'] = self.df['full_text'].str.findall(
+            r'[a-zA-Z]+')
+        self.df['full_text'] = self.df['full_text'].str.join(' ')
+        return self.df
 
-        return 
-    def remove_non_english_tweets(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        remove non english tweets from lang
-        """
+    def parse_source(self) -> pd.DataFrame:
+        source = []
+        for i in self.df['source'].tolist():
+            soup = BeautifulSoup(i, features="lxml")
+            loop = soup.a.string
+            source.append(loop)
+        self.df['source'] = source
+        return self.df
 
-        df = df.drop(df[df['lang'] != 'en'].index)
+    def fill_nullvalues(self):
+        self.df['possibly_sensitive'] = self.df['possibly_sensitive'].fillna(
+            False)
+        self.df['created_at'] = self.df['created_at'].fillna(" ")
+        self.df['location'] = self.df['location'].fillna(" ")
+        self.df['hashtags'] = self.df['hashtags'].fillna(" ")
+        self.df['user_mentions'] = self.df['user_mentions'].fillna(" ")
+        self.df['retweet_count'] = self.df['retweet_count'].fillna(0)
+        self.df['favorite_count'] = self.df['favorite_count'].fillna(0)
+        self.df['followers_count'] = self.df['followers_count'].fillna(0)
+        self.df['friends_count'] = self.df['friends_count'].fillna(0)
+        self.df['statuses_count'] = self.df['statuses_count'].fillna(0)
+        self.df['screen_name'] = self.df['screen_name'].fillna(" ")
+        self.df['lang'] = self.df['lang'].fillna(" ")
+        self.df['original_text'] = self.df['original_text'].fillna(" ")
+        self.df['full_text'] = self.df['full_text'].fillna(" ")
+        self.df['source'] = self.df['source'].fillna(" ")
+        return self.df
 
-        return df
+    def clean_data(self, save=False) -> pd.DataFrame:
+        self.df = self.drop_unwanted_column()
+        self.df = self.drop_nullValue()
+        self.df = self.drop_duplicate()
+        self.df = self.convert_to_datetime()
+        self.df = self.convert_to_numbers()
+        self.df = self.remove_non_english_tweets()
+        self.df = self.clean_full_text()
+        self.df = self.parse_source()
+        self.df = self.fill_nullvalues()
+
+        if save:
+            self.df.to_csv(
+                'data/cleaned_africa_data.csv', index=False)
+            print('Cleaned Data Saved !!!')
+        return self.df
+
+
 if __name__ == "__main__":
-    tweet_df = pd.read_csv("data\africa_twitter_data.csv")
-    cleaner = Clean_Tweets(tweet_df)
+    df = pd.read_csv("data/extracted_africa_data.csv")
+    cleaner = CleanTweets(df)
+    cleaner.clean_data(True)
