@@ -1,5 +1,5 @@
 import pandas as pd
-import extract_dataframe as ed
+import scripts.extract_dataframe as ed
 
 
 class Clean_Tweets:

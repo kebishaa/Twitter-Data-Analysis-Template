@@ -1,30 +1,22 @@
 import json
 import pandas as pd
 from textblob import TextBlob
-import zipfile
+from zipfile import ZipFile
 
-def read_json(json_file: str)->list:
-    """
-    json file reader to open and read json files into a list
-    Args:
-    -----
-    json_file: str - path of a json file
-    
-    Returns
-    -------
-    length of the json file and a list of json
-    """
-    
+def read_json(json_file: str) -> list:
     tweets_data = []
-    with zipfile.ZipFile(json_file, 'r') as zip_ref:
+    with ZipFile(json_file, 'r') as zip_ref:
         zip_ref.extractall("data/")
-    for tweets in open("data/africa_twitter_data.zip", 'r'):
+
+    for tweets in open("data/africa_twitter_data.json", 'r'):
         tweets_data.append(json.loads(tweets))
     return len(tweets_data), tweets_data
+    
 class TweetDfExtractor:
 
     def __init__(self, tweets_list):
         self.tweets_list = tweets_list
+        
     def find_statuses_count(self) -> list:
         statuses_count = []
         for tweet in self.tweets_list:

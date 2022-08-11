@@ -4,8 +4,8 @@ import sys, os
 
 sys.path.append(os.path.abspath(os.path.join("../..")))
 
-from extract_dataframe import read_json
-from extract_dataframe import TweetDfExtractor
+from scripts.extract_dataframe import read_json
+from scripts.extract_dataframe import TweetDfExtractor
 
 # For unit testing the data reading and processing codes, 
 # we will need about 5 tweet samples. 
