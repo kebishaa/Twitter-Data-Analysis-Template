@@ -3,7 +3,6 @@ import pandas as pd
 from textblob import TextBlob
 from zipfile import ZipFile
 
-
 def read_json(json_file: str) -> list:
     tweets_data = []
     with ZipFile(json_file, 'r') as zip_ref:
@@ -12,7 +11,6 @@ def read_json(json_file: str) -> list:
     for tweets in open("data/africa_twitter_data.json", 'r'):
         tweets_data.append(json.loads(tweets))
     return len(tweets_data), tweets_data
-
 
 class TweetDfExtractor:
 
