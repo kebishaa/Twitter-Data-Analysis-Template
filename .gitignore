@@ -1,2 +1,6 @@
-__pycache__/
-data/
+data/africa_twitter_data.json
+data/africa_twitter_data.zip
+data/global_twitter_data.zip
+data/sample.json
+data/extracted_africa_data.csv
+data/cleaned_africa_data.csv
