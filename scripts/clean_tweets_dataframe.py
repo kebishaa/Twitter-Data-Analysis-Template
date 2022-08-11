@@ -102,7 +102,6 @@ class CleanTweets:
         self.df['statuses_count'] = self.df['statuses_count'].fillna(0)
         self.df['screen_name'] = self.df['screen_name'].fillna(" ")
         self.df['lang'] = self.df['lang'].fillna(" ")
-        self.df['original_text'] = self.df['original_text'].fillna(" ")
         self.df['full_text'] = self.df['full_text'].fillna(" ")
         self.df['source'] = self.df['source'].fillna(" ")
         return self.df
